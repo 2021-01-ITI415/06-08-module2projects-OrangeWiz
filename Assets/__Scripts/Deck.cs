@@ -254,7 +254,7 @@ public class Deck : MonoBehaviour {
 	
 	//Find the proper face card
 	public Sprite GetFace(string faceS) {
-		foreach (Sprite tS in faceSprites) {
+			foreach (Sprite tS in faceSprites) {
 			if (tS.name == faceS) {
 				return (tS);
 			}
@@ -262,7 +262,7 @@ public class Deck : MonoBehaviour {
 		return (null);  // couldn't find the sprite (should never reach this line)
 	 }// getFace 
 
-	 static public void Shuffle(ref List<Card> oCards)
+		static public void Shuffle(ref List<Card> oCards)
 	 {
 	 	List<Card> tCards = new List<Card>();
 
