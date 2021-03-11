@@ -316,7 +316,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 827460508}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 1, z: -17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -393,7 +393,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7d7d9d9d58522f4cb96693ace07ad24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deckXML: {fileID: 4900000, guid: c76312a0fb08948699e1abf935e4a957, type: 3}
-  layoutXML: {fileID: 4900000, guid: 61f3f05951a2f4d98b35bddbc7549908, type: 3}
+  reloadDelay: 5
+  fsPosMidObject: {fileID: 0}
+  fsPosRunObject: {fileID: 0}
+  fsPosMid2Object: {fileID: 0}
+  fsPosEndObject: {fileID: 0}
+  fsPosMid: {x: 0, y: 0, z: 0}
+  fsPosRun: {x: 0, y: 0, z: 0}
+  fsPosMid2: {x: 0, y: 0, z: 0}
+  fsPosEnd: {x: 0, y: 0, z: 0}
   deck: {fileID: 0}
+  deckXML: {fileID: 4900000, guid: c76312a0fb08948699e1abf935e4a957, type: 3}
   layout: {fileID: 0}
+  layoutXML: {fileID: 4900000, guid: 61f3f05951a2f4d98b35bddbc7549908, type: 3}
+  layoutCenter: {x: 0, y: 0, z: 0}
+  xOffset: 3
+  yOffset: -2.5
+  layoutAnchor: {fileID: 0}
+  target: {fileID: 0}
+  tableau: []
+  discardPile: []
+  drawPile: []
+  chain: 0
+  scoreRun: 0
+  score: 0
+  GTGameOver: {fileID: 0}
+  GTRoundResult: {fileID: 0}

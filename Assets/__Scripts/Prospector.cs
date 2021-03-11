@@ -1,130 +1,95 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
-//An enum to handle all the possible scoring events
-public enum ScoreEvent
-{
-	draw,
-	mine,
-	mineGold,
-	gameWin,
-	gameLoss
-}
 
 public class Prospector : MonoBehaviour
 {
-	#region Fields
-	[Header("Game flow management")]
 	static public Prospector S;
-	static public int SCORE_FROM_PREVIOUS_ROUND = 0;
-	static public int HIGH_SCORE = 0;
 
-	public float reloadDelay = 5.0f; //The delay between rounds
-
-	[Header("Bezier curve management")]
-	public Transform fsPosMidObject;
-	public Transform fsPosRunObject;
-	public Transform fsPosMid2Object;
-	public Transform fsPosEndObject;
-
-	public Vector3 fsPosMid;
-	public Vector3 fsPosRun;
-	public Vector3 fsPosMid2;
-	public Vector3 fsPosEnd;
-
-	[Header("Card management")]
-	public Deck deck;
+	[Header("Set in Inspector")]
 	public TextAsset deckXML;
-	public Layout layout;
 	public TextAsset layoutXML;
-	public Vector3 layoutCenter;
 	public float xOffset = 3;
 	public float yOffset = -2.5f;
-	public Transform layoutAnchor;
+	public Vector3 layoutCenter;
+	public Vector2 fsPosMid = new Vector2(0.5f, 0.90f);
+	public Vector2 fsPosRun = new Vector2(0.5f, 0.75f);
+	public Vector2 fsPosMid2 = new Vector2(0.4f, 1.0f);
+	public Vector2 fsPosEnd = new Vector2(0.5f, 0.95f);
+	public float reloadDelay = 1f;
+	public Text gameOverText, roundResultText, highScoreText;
 
-	public CardProspector target;
-	public List<CardProspector> tableau;
-	public List<CardProspector> discardPile;
+	[Header("Set Dynamically")]
+	public Deck deck;
+	public Layout layout;
 	public List<CardProspector> drawPile;
-
-	[Header("Score management")]
-	//Fields to track score info
-	public int chain = 0; //of cards in this run
-	public int scoreRun = 0;
-	public int score = 0;
+	public Transform layoutAnchor;
+	public CardProspector target;
+	public List<CardProspector> table;
+	public List<CardProspector> discardPile;
 	//public FloatingScore fsRun;
-	public Text GTGameOver;
-	public Text GTRoundResult;
-	#endregion
 
-	#region Methods
 	void Awake()
 	{
-		/*S = this; //Prospector singleton
+		S = this;
+		//SetUpUITexts();
+	}
 
-		//Check for a high score in PlayerPrefs
-		if (PlayerPrefs.HasKey("ProspectorHighScore"))
-		{
-			HIGH_SCORE = PlayerPrefs.GetInt("ProspectorHighScore");
-		}
-
-		//Add the score from the last round, which will be >0 if it was a win
-		score += SCORE_FROM_PREVIOUS_ROUND;
-
-		//And reset the SCORE_FROM_PREVIOUS_ROUND
-		SCORE_FROM_PREVIOUS_ROUND = 0;
-
-		//Set up the Texts that show at the end of the round. Set the Text Components
-		GameObject go = GameObject.Find("GameOver");
+	/*void SetUpUITexts()
+	{
+		// Set up the HighScore UI Text
+		GameObject go = GameObject.Find("HighScore");
 		if (go != null)
 		{
-			GTGameOver = go.GetComponent<Text>();
+			highScoreText = go.GetComponent<Text>();
+		}
+		int highScore = ScoreManager.HIGH_SCORE;
+		string hScore = "High Score: " + Utils.AddCommasToNumber(highScore);
+		go.GetComponent<Text>().text = hScore;
+
+		// Set up the UI Texts that show at the end of the round 
+		go = GameObject.Find("GameOver");
+		if (go != null)
+		{
+			gameOverText = go.GetComponent<Text>();
 		}
 
 		go = GameObject.Find("RoundResult");
 		if (go != null)
 		{
-			GTRoundResult = go.GetComponent<Text>();
-		}*/
+			roundResultText = go.GetComponent<Text>();
+		}
 
-		//Make them invisible
-		//ShowResultsGTs(false);
-
-		//go = GameObject.Find("HighScore");
-		//string hScore = "High score: " + Utils.AddCommasToNumber(HIGH_SCORE);
-		//go.GetComponent<Text>().text = hScore;
+		// Make the end of round texts invisible 
+		ShowResultsUI(false);
 	}
 
-	/*void ShowResultsGTs(bool show)
+	void ShowResultsUI(bool show)
 	{
-		GTGameOver.gameObject.SetActive(show);
-		GTRoundResult.gameObject.SetActive(show);
+		gameOverText.gameObject.SetActive(show);
+		roundResultText.gameObject.SetActive(show);
 	}
 	*/
 
-	// Use this for initialization
 	void Start()
 	{
-		//Scoreboard.S.score = score;
-		deck = GetComponent<Deck>(); //Get the Deck
-		deck.InitDeck(deckXML.text); //Pass DeckXML to it
-		Deck.Shuffle(ref deck.cards); //This shuffles the deck. The ref keyword passes a reference to deck.cards, which allows
-									  //deck.cards to be modified by Deck.Shuffle()
+		//Scoreboard.S.score = ScoreManager.SCORE;
 
-		layout = GetComponent<Layout>(); //Get the layout
-		layout.ReadLayout(layoutXML.text); //Pass LayoutXML to it
+		deck = GetComponent<Deck>();
+		deck.InitDeck(deckXML.text);
+		Deck.Shuffle(ref deck.cards); // This shuffles the deck by reference 
 
+		/// Card c;
+		/// for (int cNum=0; cNum<deck.cards.Count; cNum++) {
+		///	c = deck.cards[cNum];
+		/// c.transform.localPosition = new Vector3((cNum % 13) * 3, cNum / 13 * 4, 0);
+		layout = GetComponent<Layout>();
+		layout.ReadLayout(layoutXML.text);
 		drawPile = ConvertListCardsToListCardProspectors(deck.cards);
 		LayoutGame();
-
-		//Get Bezier curve positions
-		/*fsPosMid = fsPosMidObject.position;
-		fsPosRun = fsPosRunObject.position;
-		fsPosMid2 = fsPosMid2Object.position;
-		fsPosEnd = fsPosEndObject.position;*/
 	}
 
 	List<CardProspector> ConvertListCardsToListCardProspectors(List<Card> lCD)
@@ -140,66 +105,43 @@ public class Prospector : MonoBehaviour
 	}
 
 	
-	//The Draw function will pull a single card from the drawPile and return it
 	CardProspector Draw()
 	{
-		CardProspector cd = drawPile[0]; //Pull the 0th CardProspector
-		drawPile.RemoveAt(0); //Then remove it from List<> drawPile
-		return (cd); //And return it
+		CardProspector cd = drawPile[0]; 
+		drawPile.RemoveAt(0); 
+		return (cd); 
 	}
 
-	//Convert from the layoutID int to the CardProspector with that ID
-	CardProspector FindCardByLayoutID(int layoutID)
-	{
-		foreach (CardProspector tCP in tableau)
-		{
-			//Search through all cards in the tableau List<>
-			if (tCP.layoutID == layoutID)
-			{
-				//If the card has the same ID, return it
-				return tCP;
-			}
-		}
-		//If it'snot found, return null
-		return null;
-	}
-
-	//LayoutGame() positions the initial tableau of cards, AKA the "mine"
+	
 	void LayoutGame()
 	{
-		//Create an empty GameObject to serve as an anchor for the tableau
+		
 		if (layoutAnchor == null)
 		{
-			GameObject tGO = new GameObject("_LayoutAnchor"); //Create an empty GameObject named _LayoutAnchor in the Hierarchy
-			layoutAnchor = tGO.transform; //Grab its transform
-			layoutAnchor.transform.position = layoutCenter; //Position it
+			GameObject tGO = new GameObject("_LayoutAnchor");			
+			layoutAnchor = tGO.transform; 
+			layoutAnchor.transform.position = layoutCenter;
 		}
 
 		CardProspector cp;
-		//Follow the layout
-		foreach (SlotDef tSD in layout.slotDefs) //Iterate through all the SlotDefs in the layout.slotDefs as tSD
+		foreach (SlotDef tSD in layout.slotDefs)
 		{
-			cp = Draw(); //Pull a card from the top (beginning) of the drawPile
-			cp.faceUp = tSD.faceUp; //Set its faceUp to the value in SlotDef
-			cp.transform.parent = layoutAnchor; //Make its parent layoutAnchor
-
-			//This replaces the previous parent: deck.deckAnchor, which appears as _Deck in the Hierarchy when the scene is playing
+			cp = Draw();
+			cp.faceUp = tSD.faceUp;
+			cp.transform.parent = layoutAnchor;
 			cp.transform.localPosition = new Vector3(
 				layout.multiplier.x * tSD.x,
 				layout.multiplier.y * tSD.y,
-				-tSD.layerID); //Set the localPosition of the card based on slotDef
-
+				-tSD.layerID);
 			cp.layoutID = tSD.id;
 			cp.slotDef = tSD;
 			cp.state = CardState.tableau;
+			cp.SetSortingLayerName(tSD.layerName);
 
-			//CardProspectors in the tableau have the state CardState.tableau
-			//cp.SetSortingLayerName(tSD.layerName); //Set the sorting layers
-			tableau.Add(cp); //Add this CardProspector to the List<> tableau
+			table.Add(cp);
 		}
-/*
-		//Set which cards are hiding others
-		foreach (CardProspector tCP in tableau)
+
+		foreach (CardProspector tCP in table)
 		{
 			foreach (int hid in tCP.slotDef.hiddenBy)
 			{
@@ -208,140 +150,121 @@ public class Prospector : MonoBehaviour
 			}
 		}
 
-		//Set up the initial target card
 		MoveToTarget(Draw());
 
-		//Set up the Draw pile
-		UpdateDrawPile();*/
+		UpdateDrawPile();
+
 	}
-	/*
-	//CardClicked is called any time a card in the game is clicked
-	public void CardClicked(CardProspector cd)
+
+	CardProspector FindCardByLayoutID(int layoutID)
 	{
-		//The reaction is determined by the state of the clicked card
-		switch (cd.state)
+		foreach (CardProspector tCP in table)
 		{
-			case CardState.target:
-				//Clicking the target card does nothing
-				break;
-			case CardState.drawpile:
-				//Clicking any card in the drawPile will draw the next card
-				MoveToDiscard(target); //Moves the target to the discardPile
-				MoveToTarget(Draw()); //Moves the next drawn card to the target
-				UpdateDrawPile(); //Restacks the DrawPile
-				ScoreManager(ScoreEvent.draw);
-				break;
-			case CardState.tableau:
-				//Clicking a card in the tableau will check if it's a valid play
-				bool validMatch = true;
-				if (!cd.faceUp)
-				{
-					//If the card is face-down, it's not valid
-					validMatch = false;
-				}
-				if (!AdjacentRank(cd, target))
-				{
-					//If it's not an adjacent rank, it's not valid
-					validMatch = false;
-				}
-				if (!validMatch)
-				{
-					return; //Return if not valid
-				}
 
-				//Yay, a valid card!
-				tableau.Remove(cd); //Remove it from the tableau list
-				MoveToTarget(cd); //Make it the target card
-				SetTableauFaces(); //Update tableau card face-ups
-				ScoreManager(ScoreEvent.mine);
-				break;
+			if (tCP.layoutID == layoutID)
+			{
+				return (tCP);
+			}
 		}
-
-		//Check to see whether the game is over or not
-		CheckForGameOver();
+		return (null);
 	}
 
-	//Moves the current target to the discardPile
+
+	void SetTableauFaces()
+	{
+		foreach (CardProspector cd in table)
+		{
+			bool faceUp = true; 
+			foreach (CardProspector cover in cd.hiddenBy)
+			{
+				if (cover.state == CardState.tableau)
+				{
+					faceUp = false;
+				}
+			}
+			cd.faceUp = faceUp;
+		}
+	}
+
+
 	void MoveToDiscard(CardProspector cd)
 	{
-		//Set the state of the card to discard
+
 		cd.state = CardState.discard;
-		discardPile.Add(cd); //Add it to the discardPile List<>
-		cd.transform.parent = layoutAnchor; //Update its transform parent
+		discardPile.Add(cd); 
+		cd.transform.parent = layoutAnchor; 
+
+
 		cd.transform.localPosition = new Vector3(
 			layout.multiplier.x * layout.discardPile.x,
-			layout.multiplier.y * layout.multiplier.y,
-			-layout.discardPile.layerID + 0.5f); //Position it on the discardPile
+			layout.multiplier.y * layout.discardPile.y,
+			-layout.discardPile.layerID + 0.5f);
 		cd.faceUp = true;
 
-		//Place it on top of the pile for depth sorting
 		cd.SetSortingLayerName(layout.discardPile.layerName);
 		cd.SetSortOrder(-100 + discardPile.Count);
 	}
 
-	//Make cd the new target card
+
 	void MoveToTarget(CardProspector cd)
 	{
-		//If there is currently a target card, move it to discardPile
+
 		if (target != null) MoveToDiscard(target);
-		target = cd; //cd is the new target
+		target = cd;
 		cd.state = CardState.target;
 		cd.transform.parent = layoutAnchor;
 
-		//Move to the target position
+
 		cd.transform.localPosition = new Vector3(
 			layout.multiplier.x * layout.discardPile.x,
-			layout.multiplier.y * layout.multiplier.y,
+			layout.multiplier.y * layout.discardPile.y,
 			-layout.discardPile.layerID);
-		cd.faceUp = true; //Make it face-up
 
-		//Set the depth sorting
+		cd.faceUp = true;
 		cd.SetSortingLayerName(layout.discardPile.layerName);
 		cd.SetSortOrder(0);
 	}
 
-	//Arranges all the cards of the drawPile to show how many are left
+
 	void UpdateDrawPile()
 	{
 		CardProspector cd;
 
-		//Go through all the cards of the drawPile
 		for (int i = 0; i < drawPile.Count; i++)
 		{
 			cd = drawPile[i];
 			cd.transform.parent = layoutAnchor;
 
-			//Position it correctly with the layout.drawPile.stagger
+			//if (Random.Range(0, 100) < 10)
+			//	drawPile[i].isGoldCard = true;
+
+
 			Vector2 dpStagger = layout.drawPile.stagger;
 			cd.transform.localPosition = new Vector3(
 				layout.multiplier.x * (layout.drawPile.x + i * dpStagger.x),
 				layout.multiplier.y * (layout.drawPile.y + i * dpStagger.y),
 				-layout.drawPile.layerID + 0.1f * i);
-			cd.faceUp = false; //Make them all face-down
-			cd.state = CardState.drawpile;
 
-			//Set the depth sorting
+			cd.faceUp = false;
+			cd.state = CardState.drawpile;
 			cd.SetSortingLayerName(layout.drawPile.layerName);
 			cd.SetSortOrder(-10 * i);
 		}
 	}
 
-	//Return true if the two cards are adjacent in rank (A & K wrap around)
 	public bool AdjacentRank(CardProspector c0, CardProspector c1)
 	{
-		//If either card is face-down, it's not adjacent
+
 		if (!c0.faceUp || !c1.faceUp)
 		{
 			return (false);
 		}
 
-		//If they are 1 apart, they are adjacent
 		if (Mathf.Abs(c0.rank - c1.rank) == 1)
 		{
 			return (true);
 		}
 
-		//If one is A and the other King, they're adjacent
 		if (c0.rank == 1 && c1.rank == 13)
 		{
 			return true;
@@ -352,129 +275,183 @@ public class Prospector : MonoBehaviour
 			return true;
 		}
 
-		//Otherwise, return false
 		return false;
 	}
 
-	//This turns cards in the Mine face-up or face-down
-	void SetTableauFaces()
+	public void CardClicked(CardProspector cd)
 	{
-		foreach (CardProspector cd in tableau)
+
+		switch (cd.state)
 		{
-			bool fup = true; //Assume the card will be face-up
-			foreach (CardProspector cover in cd.hiddenBy)
-			{
-				//If either of the covering cards are in the tableau
-				if (cover.state == CardState.tableau)
+			case CardState.target:
+
+				break;
+
+			case CardState.drawpile:
+				
+				MoveToDiscard(target); 
+				MoveToTarget(Draw()); 
+				UpdateDrawPile();
+				//ScoreManager.EVENT(eScoreEvent.draw, false);
+				//FloatingScoreHandler(eScoreEvent.draw);
+				break;
+
+			case CardState.tableau:
+				
+				bool validMatch = true;
+				CardProspector tempCardRef = target;
+				if (!cd.faceUp)
 				{
-					fup = false; //then this card is face-down
+					validMatch = false;
 				}
-			}
-			cd.faceUp = fup; //Set the value on the card
+				if (!AdjacentRank(cd, target))
+				{
+					
+					validMatch = false;
+				}
+				if (!validMatch) return;				
+				table.Remove(cd); 
+				MoveToTarget(cd); 
+				SetTableauFaces();
+
+				//ScoreManager.EVENT(eScoreEvent.mine, tempCardRef.isGoldCard);
+				//FloatingScoreHandler(eScoreEvent.mine);
+				break;
 		}
+		//CheckForGameOver();
 	}
 
-	//Test whether the game is over
+	/*
 	void CheckForGameOver()
 	{
-		//If the tableau is empty, the game is over
-		if (tableau.Count == 0)
+		if (table.Count == 0)
 		{
-			//Call GameOver() with a win
 			GameOver(true);
 			return;
 		}
 
-		//If there are still cards in the draw pile, the game's not over
 		if (drawPile.Count > 0)
 		{
 			return;
 		}
 
-		//Check for remaining valid plays
-		foreach (CardProspector cd in tableau)
+		// Check for remaining valid plays
+		foreach (CardProspector cd in table)
 		{
 			if (AdjacentRank(cd, target))
 			{
-				//If there's a valid play, the game's not over
+				// If there is a valid play, the game's not over
 				return;
 			}
 		}
 
-		//Since there are no valid plays, the game is over
-		//Call GameOver with a loss
+		// Since there are no valid plays, the game is over
+		// Call GameOver with a loss
 		GameOver(false);
 	}
 
-	//Called when the game is over. Simple for now, but expandable
+	// Called when the game is over. Simple for now, but expandable
 	void GameOver(bool won)
 	{
+		int score = ScoreManager.SCORE;
+		if (fsRun != null) score += fsRun.score;
 		if (won)
 		{
-			ScoreManager(ScoreEvent.gameWin);
+			gameOverText.text = "Round Over";
+			roundResultText.text = "You won this round! \nRound Score: " + score;
+			ShowResultsUI(true);
+			// print("Game Over. You won! :)"); // Comment out this line
+			ScoreManager.EVENT(eScoreEvent.gameWin, false);
+			FloatingScoreHandler(eScoreEvent.gameWin);
 		}
 		else
 		{
-			ScoreManager(ScoreEvent.gameLoss);
+			gameOverText.text = "Game Over";
+			if (ScoreManager.HIGH_SCORE <= score)
+			{
+				string str = "You got the high score!\nHigh score: " + score;
+				roundResultText.text = str;
+			}
+			else
+			{
+				roundResultText.text = "Your final score was: " + score;
+			}
+			ShowResultsUI(true);
+			// print("Game Over. You Lost. :("); // Comment out this line
+			ScoreManager.EVENT(eScoreEvent.gameLoss, false);
+			FloatingScoreHandler(eScoreEvent.gameLoss);
 		}
+		// Reload the scene, resetting the game
+		// SceneManager.LoadScene("__Prospector_Scene_0"); // Now commented out!
 
-		//Reload the scene in reloadDelay seconds
-		//This will give the score a moment to travel
+		// Reload the scene in reloadDelay seconds
+		// This will give the score a moment to travel
 		Invoke("ReloadLevel", reloadDelay);
 	}
 
 	void ReloadLevel()
 	{
-		//Reload trhe scene, resetting the game
-		SceneManager.LoadScene("Scene 0");
+		// Reload the scene, resetting the game
+		SceneManager.LoadScene("__Prospector_Scene_0"); // Now commented out!
 	}
 
-	//ScoreManager handles all the scoring
-	void ScoreManager(ScoreEvent sEvt)
+	// Return true if the two cards are adjacent in rank (A & K wrap around)
+	public bool AdjacentRank(CardProspector c0, CardProspector c1)
 	{
-		List<Vector3> fsPts;
-		switch (sEvt)
-		{
-			//Same things need to happen whether it's a draw, a win, or a loss
-			case ScoreEvent.draw: //Drawing a card
-			case ScoreEvent.gameWin: //Won the round
-			case ScoreEvent.gameLoss: //Lost the round
-				chain = 0; //resets the score chain
-				score += scoreRun; //Add scoreRun to the total score
-				scoreRun = 0; //reset scoreRun
+		// If either card is face-down, it's not adjacent.
+		if (!c0.faceUp || !c1.faceUp) return (false);
 
-				//Add fsRun to the _Scoreboard score
+		// If they are 1 apart, they are adjacent 
+		if (Mathf.Abs(c0.rank - c1.rank) == 1)
+		{
+			return (true);
+		}
+		// If one is Ace and the other King, they are adjacent 
+		if (c0.rank == 1 && c1.rank == 13) return (true);
+		if (c0.rank == 13 && c1.rank == 1) return (true);
+
+		// Otherwse, return false
+		return (false);
+	}
+
+	// Hnadle FloatingScore movememnt 
+	void FloatingScoreHandler(eScoreEvent evt)
+	{
+		List<Vector2> fsPts;
+		switch (evt)
+		{
+			// Same things need to happen whether it's a draw, a win, or a loss
+			case eScoreEvent.draw: // Drawing a card
+			case eScoreEvent.gameWin: // Won the round 
+			case eScoreEvent.gameLoss: // Lost the round
+									   // Add fsRun to the Scoreboard score
 				if (fsRun != null)
 				{
-					//Create points for the Bezier curve
-					fsPts = new List<Vector3>();
+					// Create points for the Bezier Curve
+					fsPts = new List<Vector2>();
 					fsPts.Add(fsPosRun);
 					fsPts.Add(fsPosMid2);
 					fsPts.Add(fsPosEnd);
 					fsRun.reportFinishTo = Scoreboard.S.gameObject;
 					fsRun.Init(fsPts, 0, 1);
-
-					//Also adjust the fontSize
+					// Also adjust the fontSize
 					fsRun.fontSizes = new List<float>(new float[] { 28, 36, 4 });
-					fsRun = null; //Clear fsRun so it's created again
+					fsRun = null; // Clear fsRun so it's created again
 				}
 				break;
-			case ScoreEvent.mine: //Remove a mine card
-				chain++; //Increase the score chain
-				scoreRun += chain; //add score for this card to run
 
-				//Create a FloatingScore for this score
+			case eScoreEvent.mine: // Remove a mine card
+								   // Create a FloatingScore for this score 
 				FloatingScore fs;
-
-				//Move it from the mousePosition to fsPosRun
-				Vector3 p0 = Input.mousePosition;
-				//p0.x /= Screen.width;
-				//p0.y /= Screen.height;
-				fsPts = new List<Vector3>();
+				// Move it from the mousePosition to fsPosRun
+				Vector2 p0 = Input.mousePosition;
+				p0.x /= Screen.width;
+				p0.y /= Screen.height;
+				fsPts = new List<Vector2>();
 				fsPts.Add(p0);
 				fsPts.Add(fsPosMid);
 				fsPts.Add(fsPosRun);
-				fs = Scoreboard.S.CreateFloatingScore(chain, fsPts);
+				fs = Scoreboard.S.CreateFloatingScore(ScoreManager.CHAIN, fsPts);
 				fs.fontSizes = new List<float>(new float[] { 4, 50, 28 });
 				if (fsRun == null)
 				{
@@ -487,42 +464,6 @@ public class Prospector : MonoBehaviour
 				}
 				break;
 		}
-
-		//This second switch statement handles round wins and losses
-		switch (sEvt)
-		{
-			case ScoreEvent.gameWin:
-				GTGameOver.text = "Round Over";
-				//If it's a win, add the score to the next round. static fields are NOT reset by reloading the level
-				Prospector.SCORE_FROM_PREVIOUS_ROUND = score;
-				//print("You won this round! Round score: " + score);
-				GTRoundResult.text = "You won this round! Play another to add to your score!\nRound Score: " + score;
-				ShowResultsGTs(true);
-				break;
-			case ScoreEvent.gameLoss:
-				GTGameOver.text = "Game Over";
-				//If it's a loss, check against the high score
-				if (Prospector.HIGH_SCORE <= score)
-				{
-					//print("You got the high score! High score: " + score);
-					string sRR = "You got the high score!\nHigh score: " + score;
-					GTRoundResult.text = sRR;
-					Prospector.HIGH_SCORE = score;
-					PlayerPrefs.SetInt("ProspectorHighScore", score);
-				}
-				else
-				{
-					//print("Your final score for the game was:" + score);
-					GTRoundResult.text = "Your final score was: " + score;
-				}
-				ShowResultsGTs(true);
-				break;
-			default:
-				//print("score: " + score + " scoreRun: " + scoreRun + " chain: " + chain);
-				break;
-		}
 	}
 	*/
-	#endregion
-	
 }
