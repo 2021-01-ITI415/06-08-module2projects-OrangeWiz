@@ -118,13 +118,13 @@ public class Prospector : MonoBehaviour
 		layout.ReadLayout(layoutXML.text); //Pass LayoutXML to it
 
 		drawPile = ConvertListCardsToListCardProspectors(deck.cards);
-		//LayoutGame();
+		LayoutGame();
 
 		//Get Bezier curve positions
-		fsPosMid = fsPosMidObject.position;
+		/*fsPosMid = fsPosMidObject.position;
 		fsPosRun = fsPosRunObject.position;
 		fsPosMid2 = fsPosMid2Object.position;
-		fsPosEnd = fsPosEndObject.position;
+		fsPosEnd = fsPosEndObject.position;*/
 	}
 
 	List<CardProspector> ConvertListCardsToListCardProspectors(List<Card> lCD)
@@ -139,7 +139,7 @@ public class Prospector : MonoBehaviour
 		return (lCP);
 	}
 
-	/*
+	
 	//The Draw function will pull a single card from the drawPile and return it
 	CardProspector Draw()
 	{
@@ -194,10 +194,10 @@ public class Prospector : MonoBehaviour
 			cp.state = CardState.tableau;
 
 			//CardProspectors in the tableau have the state CardState.tableau
-			cp.SetSortingLayerName(tSD.layerName); //Set the sorting layers
+			//cp.SetSortingLayerName(tSD.layerName); //Set the sorting layers
 			tableau.Add(cp); //Add this CardProspector to the List<> tableau
 		}
-
+/*
 		//Set which cards are hiding others
 		foreach (CardProspector tCP in tableau)
 		{
@@ -212,9 +212,9 @@ public class Prospector : MonoBehaviour
 		MoveToTarget(Draw());
 
 		//Set up the Draw pile
-		UpdateDrawPile();
+		UpdateDrawPile();*/
 	}
-
+	/*
 	//CardClicked is called any time a card in the game is clicked
 	public void CardClicked(CardProspector cd)
 	{
