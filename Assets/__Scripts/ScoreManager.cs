@@ -20,7 +20,7 @@ public class ScoreManager : MonoBehaviour
     static public int HIGH_SCORE = 0;
 
     [Header("Set Dynamically")]
-    // Fields to track score info
+
     public int chain = 0;
     public int scoreRun = 0;
     public int score = 0;
@@ -29,29 +29,28 @@ public class ScoreManager : MonoBehaviour
     {
         if (S == null)
         {
-            S = this; // Set the private singleton
+            S = this;
         }
         else
         {
             Debug.LogError("ERROR: ScoreManager.Awake(): S is already set!");
         }
 
-        // Check for a high score in PlayerPrefs
+
         if (PlayerPrefs.HasKey("ProspectorHighScore"))
         {
             HIGH_SCORE = PlayerPrefs.GetInt("ProspectorHighScore");
         }
-        // Add the score from last round, which will be >0 if it was a win
+
         score += SCORE_FROM_PREV_ROUND;
-        // And resent the SCORE_FROM_PREV_ROUND
         SCORE_FROM_PREV_ROUND = 0;
     }
 
-    static public void EVENT(eScoreEvent evt)
+    static public void EVENT(eScoreEvent evt, bool gold)
     {
         try
-        { // try-catch stops an error from breaking your program
-            S.Event(evt);
+        {
+            S.Event(evt, gold);
         }
         catch (System.NullReferenceException nre)
         {
@@ -59,44 +58,42 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
-    void Event(eScoreEvent evt)
+    void Event(eScoreEvent evt, bool gold)
     {
         switch (evt)
         {
-            // Same things need to happen whether it's a draw, a win, or a lose
-            case eScoreEvent.draw: // Drawing a card
-            case eScoreEvent.gameWin: // Won the round
-            case eScoreEvent.gameLoss: // Lost the round
-                chain = 0; // resets the score chain
-                score += scoreRun; // add scoreRun to total score
-                scoreRun = 0; // reset scoreRun
+
+            case eScoreEvent.draw: 
+            case eScoreEvent.gameWin: 
+            case eScoreEvent.gameLoss: 
+                chain = 0; 
+                score += scoreRun; 
+                scoreRun = 0; 
                 break;
 
-            case eScoreEvent.mine: // Remove a mine card
-               /* if (goldCard)
+            case eScoreEvent.mine:
+                if (gold)
                 {
                     chain += 2;
+                    scoreRun += 1;
                 }
                 else
-                {*/
-                    chain++;  // increase the score chain 
-                //}
-                scoreRun += chain; // add score for this card to run
+                {
+                    chain++; 
+                }
+                scoreRun += chain;
                 break;
         }
 
-        // This second switch statement handles round wins or losses
+
         switch (evt)
         {
             case eScoreEvent.gameWin:
-                // If it's a win, add the score to the next round
-                // static fields are NOT reset by SceneManager.LoadScene()
                 SCORE_FROM_PREV_ROUND = score;
                 print("You won this round! Round score: " + score);
                 break;
 
             case eScoreEvent.gameLoss:
-                // If it's a loss, check against the high score
                 if (HIGH_SCORE <= score)
                 {
                     print(" You got the high score! High Score: " + score);

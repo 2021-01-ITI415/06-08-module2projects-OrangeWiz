@@ -54,7 +54,7 @@ public class FloatingScore : MonoBehaviour
     public void Init(List<Vector2> ePts, float eTimeS = 0, float eTimeD = 1)
     {
         rectTrans = GetComponent<RectTransform>();
-        rectTrans.anchoredPosition = new Vector2(120,400);
+        rectTrans.anchoredPosition = new Vector2(232,645);
 
         txt = GetComponent<Text>();
 

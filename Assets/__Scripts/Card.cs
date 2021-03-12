@@ -4,15 +4,15 @@ using System.Collections.Generic;
 
 public class Card : MonoBehaviour
 {
+	public bool gold = false;
+
+	[Header("Set Dynamically")]
 	public string suit;
 	public int rank;
-	public Color color = Color.black;
-	public string colS = "Black";
-
+	public Color color = Color.black; 
+	public string colS = "Black"; 
 
 	public List<GameObject> decoGOs = new List<GameObject>();
-
-
 	public List<GameObject> pipGOs = new List<GameObject>();
 
 	public GameObject back;
@@ -20,10 +20,53 @@ public class Card : MonoBehaviour
 
 	public SpriteRenderer[] spriteRenderers;
 
+	public void SetSortOrder(int sOrd)
+	{
+		PopulateSpriteRenderers();
+		foreach (SpriteRenderer tSR in spriteRenderers)
+		{
+			if (tSR.gameObject == this.gameObject)
+			{
+				tSR.sortingOrder = sOrd;
+				continue;
+			}
+
+			switch (tSR.gameObject.name)
+			{
+				case "back":
+					tSR.sortingOrder = sOrd + 2;
+					break;
+				case "face":
+				default:
+					tSR.sortingOrder = sOrd + 1;
+					break;
+			}
+		}
+	}
+
 	void Start()
 	{
 		SetSortOrder(0);
+
+			if (gold){
+				foreach(var spr in spriteRenderers)
+				{
+					if(spr.gameObject.name == "face")
+					{
+						GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Card_Front_Gold");
+					}
+				}
+
+				foreach(var spr in spriteRenderers)
+				{
+					if(spr.gameObject.name == "back")
+					{
+						spr.sprite = Resources.Load<Sprite>("Card_Back_Gold");
+					}
+				}
+			}
 	}
+
 
 	public bool faceUp
 	{
@@ -52,31 +95,6 @@ public class Card : MonoBehaviour
 		foreach (SpriteRenderer tSR in spriteRenderers)
 		{
 			tSR.sortingLayerName = tSLN;
-		}
-	}
-
-
-	public void SetSortOrder(int sOrd)
-	{
-		PopulateSpriteRenderers();
-		foreach (SpriteRenderer tSR in spriteRenderers)
-		{
-			if (tSR.gameObject == this.gameObject)
-			{
-				tSR.sortingOrder = sOrd;
-				continue;
-			}
-
-			switch (tSR.gameObject.name)
-			{
-				case "back":
-					tSR.sortingOrder = sOrd + 2;
-					break;
-				case "face":
-				default:
-					tSR.sortingOrder = sOrd + 1;
-					break;
-			}
 		}
 	}
 
