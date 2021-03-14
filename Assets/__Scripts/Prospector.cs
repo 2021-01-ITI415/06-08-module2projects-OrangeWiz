@@ -374,10 +374,9 @@ public class Prospector : MonoBehaviour
 		List<Vector2> fsPts;
 		switch (evt)
 		{
-			case eScoreEvent.draw: 
-			case eScoreEvent.gameWin: 
-			case eScoreEvent.gameLoss: 
-
+			case eScoreEvent.draw:
+			case eScoreEvent.gameWin:
+			case eScoreEvent.gameLoss:
 				if (fsRun != null)
 				{
 					fsPts = new List<Vector2>();
