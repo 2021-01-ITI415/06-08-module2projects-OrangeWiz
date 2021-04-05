@@ -262,8 +262,6 @@ public class ClockProspector : MonoBehaviour
 				MoveToDiscard(target);
 				MoveToTarget(Draw());
 				UpdateDrawPile();
-				ScoreManager.EVENT(eScoreEvent.draw, false);
-				FloatingScoreHandler(eScoreEvent.draw);
 				break;
 
 			case eCardState.tableau:

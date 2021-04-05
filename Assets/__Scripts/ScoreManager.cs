@@ -99,11 +99,22 @@ public class ScoreManager : MonoBehaviour
                 case eScoreEvent.draw:
                 case eScoreEvent.gameWin:
                 case eScoreEvent.gameLoss:
+                    chain = 0;
                     score += scoreRun;
+                    scoreRun = 0;
                     break;
 
-                case eScoreEvent.mine:                    
-                        score += 1;                 
+                case eScoreEvent.mine:
+                    if (gold)
+                    {
+                        //chain += 2;
+                        //scoreRun += 1;
+                    }
+                    else
+                    {
+                        chain=1;
+                    }
+                    scoreRun += chain;
                     break;
             }
         }
