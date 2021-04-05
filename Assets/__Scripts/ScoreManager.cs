@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // An enum to handle all the possible scoring events 
 public enum eScoreEvent
@@ -60,29 +61,51 @@ public class ScoreManager : MonoBehaviour
 
     void Event(eScoreEvent evt, bool gold)
     {
-        switch (evt)
+
+        if (SceneManager.GetActiveScene().name == "__Prospector_Scene_0")
         {
 
-            case eScoreEvent.draw: 
-            case eScoreEvent.gameWin: 
-            case eScoreEvent.gameLoss: 
-                chain = 0; 
-                score += scoreRun; 
-                scoreRun = 0; 
-                break;
+            switch (evt)
+            {
 
-            case eScoreEvent.mine:
-                if (gold)
-                {
-                    chain += 2;
-                    scoreRun += 1;
-                }
-                else
-                {
-                    chain++; 
-                }
-                scoreRun += chain;
-                break;
+                case eScoreEvent.draw:
+                case eScoreEvent.gameWin:
+                case eScoreEvent.gameLoss:
+                    chain = 0;
+                    score += scoreRun;
+                    scoreRun = 0;
+                    break;
+
+                case eScoreEvent.mine:
+                    if (gold)
+                    {
+                        chain += 2;
+                        scoreRun += 1;
+                    }
+                    else
+                    {
+                        chain++;
+                    }
+                    scoreRun += chain;
+                    break;
+            }
+        }
+        else
+        {
+
+            switch (evt)
+            {
+
+                case eScoreEvent.draw:
+                case eScoreEvent.gameWin:
+                case eScoreEvent.gameLoss:
+                    score += scoreRun;
+                    break;
+
+                case eScoreEvent.mine:                    
+                        score += 1;                 
+                    break;
+            }
         }
 
 

@@ -16,6 +16,10 @@ public class LoadNewScene : MonoBehaviour
         SceneManager.LoadScene("ClockSolitaire");
     }
 
+    public void LoadScene3()
+    {
+        SceneManager.LoadScene("MainScene");
+    }
 
 
 

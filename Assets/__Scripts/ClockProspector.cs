@@ -273,23 +273,10 @@ public class ClockProspector : MonoBehaviour
 				{
 					validMatch = false;
 				}
-				//if (!AdjacentRank(cd, target))
-				//{
-				//	validMatch = false;
-				//}
 				if (!validMatch) return;
 
-				/*foreach (List<CardProspector> x in cardpiles)
-				{
-					print("--New Line--");
-					foreach (CardProspector y in x)
-                    {
-						Debug.Log(y.rank);
-                    }
-                }*/
-
-
 				tableau.Remove(cd);
+
 				foreach (List<CardProspector> x in cardpiles)
 				{
 					x.Remove(cd);
@@ -304,8 +291,8 @@ public class ClockProspector : MonoBehaviour
 				if (ckings > 0)
 					SetTableauFaces(cd);
 
-				//ScoreManager.EVENT(eScoreEvent.mine, temp.gold);
-				//FloatingScoreHandler(eScoreEvent.mine);
+				ScoreManager.EVENT(eScoreEvent.mine, false);
+				FloatingScoreHandler(eScoreEvent.mine);
 				break;
 		}
 		CheckForGameOver();
@@ -325,8 +312,6 @@ public class ClockProspector : MonoBehaviour
 			}
 		}
 
-		//Debug.Log(king);
-
 		if (king <= 0)
 			GameOver(true);
 
@@ -341,8 +326,8 @@ public class ClockProspector : MonoBehaviour
 			gameOverText.text = "Round Over";
 			roundResultText.text = "You won this round! \nRound Score: " + score;
 			ShowResultsUI(true);
-			//ScoreManager.EVENT(eScoreEvent.gameWin, false);
-			//FloatingScoreHandler(eScoreEvent.gameWin);
+			ScoreManager.EVENT(eScoreEvent.gameWin, false);
+			FloatingScoreHandler(eScoreEvent.gameWin);
 		}
 		else
 		{
@@ -369,23 +354,6 @@ public class ClockProspector : MonoBehaviour
 	{
 		SceneManager.LoadScene("ClockSolitaire");
 	}
-
-
-	/*public bool AdjacentRank(CardProspector c0, CardProspector c1)
-	{
-		if (!c0.faceUp || !c1.faceUp) return (false);
-
-		if (Mathf.Abs(c0.rank - c1.rank) == 1)
-		{
-			return (true);
-		}
-
-		if (c0.rank == 1 && c1.rank == 13) return (true);
-		if (c0.rank == 13 && c1.rank == 1) return (true);
-
-
-		return (false);
-	}*/
 
 	void FloatingScoreHandler(eScoreEvent evt)
 	{

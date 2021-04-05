@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 
 public enum eFSState
@@ -50,7 +51,9 @@ public class FloatingScore : MonoBehaviour
     public void Init(List<Vector2> ePts, float eTimeS = 0, float eTimeD = 1)
     {
         rectTrans = GetComponent<RectTransform>();
-        rectTrans.anchoredPosition = new Vector2(Screen.width/3, Screen.height/2);
+        if (SceneManager.GetActiveScene().name == "__Prospector_Scene_0")
+            rectTrans.anchoredPosition = new Vector2(Screen.width / 3, Screen.height / 2);
+        else rectTrans.anchoredPosition = Vector2.zero;
 
         txt = GetComponent<Text>();
 
