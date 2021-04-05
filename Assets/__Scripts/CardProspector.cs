@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // An enum defines a variable type with a few prenamed values
 public enum eCardState
@@ -10,6 +11,7 @@ public enum eCardState
     target,
     discard
 }
+
 public class CardProspector : Card
 { 
     [Header("Set Dynamically: CardProspector")]
@@ -20,7 +22,12 @@ public class CardProspector : Card
 
     override public void OnMouseUpAsButton()
     {
-        Prospector.S.CardClicked(this);
+
+        if(SceneManager.GetActiveScene().name=="ClockSolitaire")
+            ClockProspector.S.CardClicked(this);
+        else Prospector.S.CardClicked(this);
+
+
         base.OnMouseUpAsButton();
     }
 }
